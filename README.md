@@ -1,8 +1,68 @@
+### Giới thiệu
+**Tác giả:** Võ Mạnh Cường – MSSV: 52200319  
+**Biệt danh:** Chooky  
+**Lớp:** 22050401 – Khoa Công nghệ Thông tin  
+**Trường Đại học Tôn Đức Thắng**  
+**Môn học:** Mạng máy tính nâng cao 
+**Giảng viên hướng dẫn:** ThS. Lê Viết Thanh  
+**Ngày hoàn thành:** 13/05/2025  
+
+
+---
+## 🧭 Tổng quan
+
+Dự án này trình bày quá trình **thiết kế, cấu hình và kiểm thử một hệ thống mạng doanh nghiệp tích hợp song song IPv4 và IPv6**, nhằm đáp ứng các yêu cầu về:
+
+- Định tuyến nội bộ với **EIGRP (HQ)** và **OSPF (Branch)**
+- Chuyển mạch đa tầng với **VLAN, VTP, EtherChannel, Rapid PVST+**
+- Liên kết WAN với **PPP (PAP/CHAP)** và **GRE Tunnel**
+- Dịch vụ mạng: **NAT, DHCP, ACL**
+- Địa chỉ hóa và định tuyến **IPv6**, cùng **DHCPv6**
+- Quản trị an toàn bằng **SSH**
+
+Mục tiêu là tạo ra **một hệ thống mạng doanh nghiệp mô phỏng đầy đủ chức năng**, đảm bảo **ổn định, bảo mật, dễ mở rộng và hỗ trợ cả IPv4/IPv6**.
+
+---
+
+## 🗺️ Kiến trúc hệ thống
+
+Hệ thống được chia làm hai khu vực chính:
+
+### 🏢 Trụ sở chính (HQ)
+- Các router: **R4, R6, R7, R8**
+- Các switch: **S1–S4**
+- Định tuyến: **EIGRP (AS 100)**  
+- Dịch vụ mạng: **NAT, DHCP, ACL, SSH**
+- VLANs: 10 (UNIT1), 20 (UNIT2), 30 (UNIT3), 40 (GUEST), 50 (SERVERS), 60 (Management)
+- Liên kết giữa router–switch thông qua **Router-on-a-Stick**
+
+### 🏬 Chi nhánh (Branch)
+- Router: **R1, R2, R3, R5**
+- Định tuyến: **OSPF đa khu vực**
+- R5: Router biên kết nối HQ ↔ Internet
+- Có **redistribution giữa OSPF và EIGRP**, chia sẻ tuyến giữa hai khu vực.
+
+---
+## ⚙️ Các công nghệ và kỹ thuật chính
+
+| Thành phần | Mô tả |
+|-------------|-------|
+| **Định tuyến IPv4** | EIGRP tại HQ, OSPF đa khu vực tại chi nhánh, redistribution tại R5 |
+| **Định tuyến IPv6** | EIGRP for IPv6, static default route, inter-VLAN routing |
+| **Chuyển mạch** | VLAN, VTP Server/Client, EtherChannel, Rapid-PVST+ |
+| **WAN** | PPP (PAP/CHAP), GRE Tunnel giữa R6–R8 |
+| **Dịch vụ mạng** | NAT Overload, DHCPv4, DHCPv6, ACL bảo mật |
+| **Quản trị** | SSH, Access Control List, hostname và domain riêng |
+| **Prefix IPv6** | `2019:ABBA:CDDC::/48` chia /64 cho từng VLAN |
+| **Thiết bị mô phỏng** | Router Cisco ISR4321, Switch Cisco IOS2960 |
+
+---
 
 ### Hướng dẫn sử dụng báo cáo và file cấu hình
 
-### Tổng quan
-Báo cáo này trình bày thiết kế và cấu hình một hệ thống mạng doanh nghiệp tích hợp cả IPv4 và IPv6. File cấu hình Packet Tracer (pkt) đi kèm chứa mô hình mạng tương ứng, bao gồm các router, switch, và thiết bị khác, được thiết lập dựa trên các phần đã mô tả trong báo cáo.
+Báo cáo mô tả chi tiết **thiết kế, phân bổ địa chỉ, cấu hình và kết quả kiểm thử**.  
+
+File cấu hình Packet Tracer (pkt) đi kèm chứa mô hình mạng tương ứng, bao gồm các router, switch, và thiết bị khác, được thiết lập dựa trên các phần đã mô tả trong báo cáo.
 
 ### Nội dung file cấu hình
 - **Tên file**: [configuration.pkt].
@@ -37,7 +97,28 @@ Báo cáo này trình bày thiết kế và cấu hình một hệ thống mạn
    - Kiểm tra NAT bằng cách truy cập Internet từ host trong VLAN.
    - Xác nhận DHCP/DHCPv6 bằng cách kiểm tra địa chỉ IP được cấp cho host.
    - Thử truy cập bị chặn bởi ACL để kiểm tra hiệu quả.
+   - **NAT:** ping từ host nội bộ ra Internet.
+   - **DHCP:** kiểm tra host có nhận IP động.
+   - **ACL:** thử truy cập từ VLAN bị chặn (ví dụ: GUEST) → xác minh giới hạn truy cập.
+   - **SSH:** kết nối quản trị thiết bị từ VLAN SERVERS.
 
+---
+## 📈 Kết quả và hướng mở rộng
+
+### ✅ Kết quả đạt được
+- Hệ thống hoạt động ổn định, định tuyến và NAT chính xác.
+- DHCP/DHCPv6 cấp phát IP tự động cho các VLAN.
+- GRE Tunnel giữa R6–R8 đảm bảo kết nối xuyên vùng.
+- ACL kiểm soát truy cập hiệu quả, đảm bảo tính bảo mật.
+- Mô hình dễ dàng mở rộng sang các dịch vụ khác như Web, DNS, VPN.
+
+### 🚀 Hướng phát triển
+- Triển khai **IPSec VPN** bảo mật đường hầm GRE.
+- Tối ưu **QoS** và **Load Balancing** giữa các router.
+- Mở rộng kết nối tới **Cloud/Datacenter mô phỏng**.
+- Tự động hóa cấu hình với **Python (Netmiko/NAPALM)**.
+
+---
 ### Lưu ý
 - Đảm bảo tất cả các thiết bị trong mô hình được bật nguồn (Power On) trước khi kiểm tra.
 - Nếu gặp lỗi, kiểm tra lại kết nối cáp và trạng thái interface (lệnh `show ip interface brief`).
