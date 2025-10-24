@@ -25,6 +25,10 @@ Mục tiêu là tạo ra **một hệ thống mạng doanh nghiệp mô phỏng 
 ---
 
 ## 🗺️ Kiến trúc hệ thống
+<p align="center">
+  <img src="topology.png" alt="Sơ đồ mạng" width="600">
+</p>
+
 
 Hệ thống được chia làm hai khu vực chính:
 
